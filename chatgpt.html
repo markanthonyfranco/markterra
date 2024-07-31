@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <!-- Meta tags and other head content -->
+</head>
+<body id='top' class="property-details-page">
+    <!-- Your page content -->
+    <div id="property-location-map" style="width:100%; height:500px;"></div>
+
+    <!-- Javascript -->
+    <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/jquery.flexslider-min.js"></script>
+    <script type="text/javascript" src="js/select.min.js"></script>
+    <script type="text/javascript" src="js/owl.carousel.min.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        // Google Map variables
+        var map;
+        var marker;
+        var MyMarker;
+
+        function initialize() {
+    const mapCanvas = document.getElementById('property-location-map');
+    const myLatLng = new google.maps.LatLng(47.57038937524858, -122.10226153588555);
+
+    if (!mapCanvas || !google || !google.maps) {
+        console.error('Google Maps not properly loaded or map canvas not found');
+        return;
+    }
+
+    const mapOptions = {
+        center: myLatLng,
+        zoom: 17,
+        scrollwheel: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    try {
+        const map = new google.maps.Map(mapCanvas, mapOptions);
+        const marker = new google.maps.Marker({
+            position: myLatLng,
+            icon: 'img/property/50_property-marker.png',
+            map: map
+        });
+    } catch (e) {
+        console.error('Error initializing map:', e);
+    }
+}
+
+        // Function for adding a marker to the page
+        function addMarker(location) {
+            marker = new google.maps.Marker({
+                position: location,
+                icon: 'img/property/50_property-marker.png',
+                map: map
+            });
+        }
+
+        // Testing the addMarker function
+        function TestMarker() {
+            MyMarker = new google.maps.LatLng(47.57038937524858, -122.10226153588555);
+            addMarker(MyMarker);
+        }
+
+        // Fetch the API key from your Google Cloud Function and load the Google Maps API
+        fetch('https://us-central1-tomorrowspaces.cloudfunctions.net/getApiKey')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const apiKey = data.key;
+                if (!apiKey) {
+                    throw new Error('API key not found in response');
+                }
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initialize`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            })
+            .catch(error => {
+                console.error('Error fetching API key or loading Google Maps:', error);
+            });
+    });
+    </script>
+</body>
+</html>
